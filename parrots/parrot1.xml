@@ -1,0 +1,44 @@
+{# ######### ######### ######### ######### ######### ######### ######### ######### ######### ######### 
+#}{% if request.match('<rpc><get-config><source><running/></source><filter><nacm xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-acm"/><ztp/></filter></get-config></rpc>') 
+%}Gothcha
+
+{# ######### ######### ######### ######### ######### ######### ######### ######### ######### ######### 
+#}{% elif request.match("<rpc><get-config/></rpc>") 
+%}<rpc-reply message-id="{{ message_id }}"
+           xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <data>
+    <nacm xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-acm">
+      <enable-nacm>false</enable-nacm>
+      <read-default>deny</read-default>
+      <write-default>deny</write-default>
+      <exec-default>deny</exec-default>
+    </nacm>
+  </data>
+</rpc-reply>{# 
+######### ######### ######### ######### ######### ######### ######### ######### ######### ######### 
+#}{% elif request.match("<hello xmlns='parrot'/>") 
+%}<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <capabilities>
+    <capability>urn:ietf:params:netconf:base:1.0</capability>
+    <capability>urn:ietf:params:netconf:base:1.1</capability>
+    <capability>urn:ietf:params:netconf:capability:writable-running:1.0</capability>
+    <capability>urn:ietf:params:netconf:capability:candidate:1.0</capability>
+    <capability>urn:ietf:params:netconf:capability:confirmed-commit:1.0</capability>
+    <capability>urn:ietf:params:netconf:capability:confirmed-commit:1.1</capability>
+    <capability>urn:ietf:params:netconf:capability:with-defaults:1.0?basic-mode=report-all&amp;also-supported=report-all-tagged,trim</capability>
+    <capability>http://www.huawei.com/netconf/capability/discard-commit/1.0</capability>
+    <capability>http://www.cisco.com/ns/yang/Cisco-IOS-XR-sysadmin-syslog</capability>
+
+    <capability>urn:ietf:params:xml:ns:yang:ietf-yang-library?module=ietf-yang-library&amp;revision=2016-06-21</capability>
+    <capability>urn:ietf:params:xml:ns:yang:ietf-yang-metadata?module=ietf-yang-metadata&amp;revision=2016-03-21</capability>
+    <capability>urn:ietf:params:xml:ns:yang:ietf-yang-types?module=ietf-yang-types&amp;revision=2013-07-15</capability>
+  </capabilities>
+  <session-id>{{ session_id }}</session-id>
+</hello>{# 
+######### ######### ######### ######### ######### ######### ######### ######### ######### ######### 
+#}{% elif request.match("<hello/>") 
+%}<?parrot netconf11?>{# 
+######### ######### ######### ######### ######### ######### ######### ######### ######### ######### 
+#}{% elif request.match("<rpc><close-session/></rpc>") 
+%}<?parrot end-session?>{% 
+endif %}
