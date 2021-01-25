@@ -67,11 +67,10 @@ class YANG_Server:
     end_session = False
     for (cmd, data) in instructions:
       if cmd == "send":
-        Logger.debug(5, f'Sending {len(data)} bytes', payload=data)
+        Logger.debug(6, f'Sending {len(data)} bytes', payload=data)
         self.send_message(data)
       elif cmd == "ignore":
         Logger.debug(5, f'Not sending any response')
-        print(f'IGNORE.')
       elif cmd == "netconf11":
         Logger.debug(5, f'Switching to NETCONF 1.1')
         self.choose_netconf_ver([11])
@@ -82,7 +81,7 @@ class YANG_Server:
         Logger.warning(f'Template did not provide any response. Ending the session.')
         end_session = True
       elif cmd == "end-session":
-        Logger.info(f'Ending session.')
+        Logger.info(f'Ending session')
         end_session = True
       else:
         Logger.error(f'Unknown processing instruction "{cmd}" in template. Ending the session.')

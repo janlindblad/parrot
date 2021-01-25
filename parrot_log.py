@@ -8,9 +8,10 @@
 # (C) 2021 Cisco Systems
 # Written by Jan Lindblad <jlindbla@cisco.com>
 
-import sys, traceback
+import sys, traceback, datetime, threading
 
 class Logger:
+  peek_length = 120
   trace_level = 0
   verbosity_level = 3
   # 0 total silence, 1 fatal, 2 errors, 3 warnings
@@ -33,39 +34,52 @@ class Logger:
     pass
 
   @staticmethod
-  def show_trace():
-    pass#traceback.print_exc()
+  def _emit_msg(level, prompt, message, payload=None):
+    def peek(level, payload):
+      if Logger.verbosity_level >= 7:
+        if isinstance(payload, bytes):
+          payload = "b'''"+payload.decode('utf-8')+"'''"
+        return payload
+      if Logger.verbosity_level >= 5:
+        if isinstance(payload, bytes):
+          peekstr = "b'"+payload.decode('utf-8')
+        else:
+          peekstr = "'"+str(payload)
+        if len(peekstr) > Logger.peek_length:
+          peekstr = peekstr[:Logger.peek_length]
+          peekstr += "..."
+        peekstr = peekstr.replace('\n',' ')
+        return peekstr+"'"
+      return None
+    if Logger.verbosity_level >= level:
+      now = str(datetime.datetime.now())[:-4]
+      print(f"{now} {prompt}: {message}")
+    if payload:
+      peekstr = peek(level, payload)
+      if peekstr:
+        Logger._emit_msg(level, "----", peekstr, None)
+      #Logger.show_trace()
+    if Logger.verbosity_level >= 10:
+      for th in threading.enumerate():
+        print(f"....    {th}")
 
   @staticmethod
   def debug(level, message, payload=None):
-    if Logger.verbosity_level >= level:
-      print(f"DBG{level}: {message}")
-    if payload and Logger.verbosity_level >= level+2:
-      print(f"{str(payload)}")
-    elif payload and Logger.verbosity_level >= level+1:
-      pstr = str(payload)
-      maxlen = 40
-      print(f'     "{pstr[:maxlen]}{"..." if len(pstr) > maxlen else ""}"')
-  
+    Logger._emit_msg(level, f"DBG{level}", message, payload)
+
   @staticmethod
-  def fatal(msg, code=9, payload=None):
-    if Logger.verbosity_level >= 1:
-      print(f"*** Parrot Fatal Error: {msg}")
-      Logger.show_trace()
+  def fatal(message, code=9, payload=None):
+    Logger._emit_msg(1, "****: Parrot Fatal Error", message, payload)
     sys.exit(code)
 
   @staticmethod
-  def error(msg, payload=None):
-    if Logger.verbosity_level >= 2:
-      print(f"*** Parrot Error: {msg}")
-      Logger.show_trace()
+  def error(message, payload=None):
+    Logger._emit_msg(2, "****: Parrot Error", message, payload)
 
   @staticmethod
-  def warning(msg, payload=None):
-    if Logger.verbosity_level >= 3:
-      print(f"WARN: {msg}")
+  def warning(message, payload=None):
+    Logger._emit_msg(3, "WARN", message, payload)
 
   @staticmethod
-  def info(msg, payload=None):
-    if Logger.verbosity_level >= 4:
-      print(f"INFO: {msg}")
+  def info(message, payload=None):
+    Logger._emit_msg(4, "INFO", message, payload)

@@ -51,13 +51,13 @@ class Parrot:
   def run_command_line(self, sys_argv=sys.argv):
     def usage(sys_argv):
       print(f'{sys_argv[0]} --netconf=[host:]port parrot-file.xml')
-    verbosity = 3
+    verbosity = 4
     host = "localhost"
     port = 8888
     template_dirs = []
     try:
       opts, args = getopt.getopt(sys_argv[1:],"hd:vt:",
-        ["help", "debug=", "verbosity", "netconf=", "template-dir="])
+        ["help", "debug=", "verbose", "netconf=", "template-dir="])
     except getopt.GetoptError:
       usage(sys_argv)
       sys.exit(2)
@@ -76,7 +76,7 @@ class Parrot:
         template_dirs += [arg]
       elif opt in ("-d", "--debug"):
         verbosity = int(arg)
-      elif opt in ("-v", "--verbosity"):
+      elif opt in ("-v", "--verbose"):
         verbosity += 1
       else:
         Logger.fatal(f'Unknown option "{opt}".')

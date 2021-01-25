@@ -47,11 +47,9 @@ class NETCONF_Server(YANG_Server):
     self.channel = None
     self.subsys = NETCONFsubsys
     self.netconf_ver = 10
-    self.msg_id = 0
     self.indata = b""
     self.delimiter10 = "]]>]]>".encode('utf-8')
     self.delimiter11 = "\n##\n".encode('utf-8')
-    self.logging_peek_length = 80
     self.host = ''
     self.port = 8299
     self.host_key_filename = 'hostkey2' #FIXME 'ncparrot.rsa.key'
@@ -76,20 +74,32 @@ class NETCONF_Server(YANG_Server):
       Logger.fatal('Listen failed: ' + str(e))
     Logger.info(f'Listening for connections on port {self.port}...')
 
-    #host_key = RSAKey(filename=self.host_key_filename)
-    host_key = RSAKey.generate(2048)
+    host_key = None
+    try:
+      host_key = RSAKey(filename=self.host_key_filename)
+    except:
+      pass
+    if not host_key:
+      Logger.info(f'Generating new host key')
+      host_key = RSAKey.generate(2048)
+      if self.host_key_filename:
+        host_key.write_private_key_file(self.host_key_filename, password=None)
+        Logger.info(f"Wrote host key to file, '{self.host_key_filename}'")
 
     while True:
       try:
+        Logger.info(f'Waiting for client to connect')
         client, addr = sock.accept()
       except Exception as e:
         Logger.fatal('Accept failed: ' + str(e))
       self.sock = client
-      Logger.info(f'Client {addr} connected')
+      (ip, port) = addr
+      Logger.info(f'Client {ip}:{port} connected')
       self.handle_connection(host_key)
-      Logger.info(f'Client {addr} disconnected')
+      Logger.info(f'Client {ip}:{port} disconnected')
 
   def handle_connection(self, host_key):
+    Logger.warning('NC0 handle connection')
     try:
       DoGSSAPIKeyExchange = False
       t = Transport(self.sock, gss_kex=DoGSSAPIKeyExchange)
@@ -112,10 +122,10 @@ class NETCONF_Server(YANG_Server):
       Logger.info('Waiting for message')
       server.event.wait(10000)
       Logger.info('Closing')
-      self.channel.close()
+      ##self.channel.close()
       Logger.info('Client connection closed')
     except ConnectionResetError as e:
-      Logger.info('Connection reset by peer')
+      Logger.debug(5,'Connection reset by peer')
     except SSHException:
       Logger.error('SSH negotiation failed, client connection dropped')
     except Exception as e:
@@ -133,11 +143,11 @@ class NETCONF_Server(YANG_Server):
     raise Exception("Abstract NETCONF_Server can't reply to any message")
 
   def handle_session(self):
-    Logger.debug(6, 'Session loop running')
+    Logger.debug(7, 'Session loop running')
     self.incoming_message('<?xml version="1.0" encoding="UTF-8"?><hello xmlns="parrot"/>')
     while True:
       try:
-        Logger.info('NETCONF server ready, waiting for next message')
+        Logger.debug(5,'NETCONF server ready, waiting for next message')
         msg = self.read_msg()
       except EOFError:
         Logger.debug(5,'EOF -- end of session')
@@ -177,6 +187,7 @@ class NETCONF_Server(YANG_Server):
         Logger.debug(8, f"Message10 EOF")
         msg = self.indata
         self.indata = ""
+        ##self.channel.close()
         return msg
       if len(self.indata):
         Logger.debug(8, f"Reading message10, indata size so far {len(self.indata)}", payload=self.indata)
@@ -206,6 +217,8 @@ class NETCONF_Server(YANG_Server):
           frame_len -= len_indata
           self.indata = self.channel.recv(chunk_size)
           if self.indata == b"":
+            Logger.debug(8, f"Message11 EOF")
+            ##self.channel.close()
             return b""
       if frame_len < 0: # Have not the frame length header yet
         nl0 = self.indata.find(b"\n")
@@ -225,12 +238,14 @@ class NETCONF_Server(YANG_Server):
         else:
           if (nl0 == 0 and nl1 > nl0) or (len(self.indata) > max_header_len):
             # Definitely should have a complete header, something is wrong
-            Logger.warning(f'Framing error, invalid frame header: """{self.indata[:self.logging_peek_length]}"""')
+            Logger.warning(f'Framing error, invalid frame header', payload = self.indata)
             return b""
           # No header in sight, better read some more
           data = self.channel.recv(chunk_size)
           self.indata += data
           if data == b"":
+            Logger.debug(8, f"Message11 header EOF")
+            ##self.channel.close()
             return b""
 
   # Callback
@@ -246,25 +261,13 @@ class NETCONF_Server(YANG_Server):
         decoded_msg = msg.decode("utf-8")
       else:
         decoded_msg = msg
-      Logger.debug(8,'Received {len(decoded_msg)} byte message: """{decoded_msg[:self.logging_peek_length]}"""')
+      Logger.debug(8,f'Received {len(decoded_msg)} byte message', payload=decoded_msg)
     except Exception as e:
       Logger.warning(f"Could not UTF-8 decode message", payload=msg)
       raise
     return decoded_msg
 
-  def send_msg_hook(self, msg):
-      if "<hello" in msg:
-          return msg.replace("&", "&amp;")
-      return msg
-
-  def send_msg_msgid_hook(self, msg, msg_id):
-      if msg_id == 0:
-          msg_id = self.msg_id
-      return msg.format(msg_id)
-
-  def send_msg(self, msg, msg_id=0, netconf_ver=0):
-    msg = self.send_msg_msgid_hook(msg, msg_id)
-    msg = self.send_msg_hook(msg)
+  def send_msg(self, msg, netconf_ver=0):
     chunk_size = 10000
     if netconf_ver == 0:
       netconf_ver = self.netconf_ver
@@ -272,31 +275,20 @@ class NETCONF_Server(YANG_Server):
     while msg != "":
       chunk = msg[:chunk_size].encode('utf-8')
       chunk_len = len(chunk)
-      Logger.debug(7, f'Sending {chunk_len} bytes', payload=chunk[:self.logging_peek_length])
       if netconf_ver == 11:
-        self.channel.send("\n#{}\n".format(chunk_len).encode('utf-8'))
+        header = f"\n#{chunk_len}\n".encode('utf-8')
+        Logger.debug(10, f'Sending NC11 header', payload=header)
+        self.channel.send(header)
+      Logger.debug(9, f'Sending {chunk_len} bytes chunk', payload=chunk)
       self.channel.send(chunk)
       msg = msg[chunk_size:]
     if netconf_ver == 11:
+      Logger.debug(10, f'Sending NC11 delimiter', payload=self.delimiter11)
       self.channel.send(self.delimiter11)
     if netconf_ver == 10:
+      Logger.debug(10, f'Sending NC10 delimiter', payload=self.delimiter10)
       self.channel.send(self.delimiter10)
-    Logger.info(f'Total {msg_len} bytes in NC{netconf_ver} message')
-
-#  def parse_msg_id(self, message):
-#        # Expect occasional malformed XML, so let's do this the crude way
-#        rpc_begin   = message.find("<rpc ")
-#        rpc_end     = message.find(">", rpc_begin)
-#        msgid_begin = message.find("message-id=", rpc_begin, rpc_end)
-#        msgid_end   = message.find(" ", msgid_begin, rpc_end)
-#        if rpc_begin < 0 or rpc_end < 0 or msgid_begin < 0:
-#            return "0"
-#        msg_id = ""
-#        if msgid_end < 0:
-#            msgid_end = rpc_end
-#        attr_len = 11
-#        msg_id = message[msgid_begin+attr_len:msgid_end].replace("'","").replace('"','')
-#        return msg_id
+    Logger.info(f"Sent {msg_len} bytes in NC{netconf_ver} message", payload=msg)
 
   # Callback
   def handle_read_exception(self, e):
