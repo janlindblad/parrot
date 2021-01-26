@@ -48,7 +48,7 @@ class NETCONF_Server(YANG_Server):
     self.subsys = NETCONFsubsys
     self.netconf_ver = 10
     self.indata = b""
-    self.delimiter10 = "]]>]]>".encode('utf-8')
+    self.delimiter10b = b"]]>]]>"
     self.delimiter11 = "\n##\n".encode('utf-8')
     self.host = ''
     self.port = 8299
@@ -120,7 +120,7 @@ class NETCONF_Server(YANG_Server):
         return
 
       Logger.info('Waiting for message')
-      server.event.wait(10000)
+      server.event.wait(10)
       Logger.info('Closing')
       ##self.channel.close()
       Logger.info('Client connection closed')
@@ -179,24 +179,24 @@ class NETCONF_Server(YANG_Server):
   def read_msg_10(self):
     chunk_size = 10000
     while True:
+      if len(self.indata):
+        Logger.debug(8, f"Reading message10, indata size so far {len(self.indata)}", payload=self.indata)
+      eom = self.indata.find(self.delimiter10b)
+      if eom >= 0:
+        msg = self.indata[:eom]
+        self.indata = self.indata[eom+len(self.delimiter10b):]
+        Logger.debug(8, f"Message10 complete. Size {len(msg)}, remaining in indata {len(self.indata)}")
+        return msg
       time.sleep(.5)
       next_chunk = self.channel.recv(chunk_size)
+      Logger.debug(7, f"Read {len(next_chunk)} bytes NC10")
       if next_chunk:
         self.indata += next_chunk
       else:
         Logger.debug(8, f"Message10 EOF")
         msg = self.indata
-        self.indata = ""
-        ##self.channel.close()
-        return msg
-      if len(self.indata):
-        Logger.debug(8, f"Reading message10, indata size so far {len(self.indata)}", payload=self.indata)
-      eom = self.indata.find(self.delimiter10)
-      if eom >= 0:
-        msg = self.indata[:eom]
-        self.indata = self.indata[eom+len(self.delimiter10):]
-        Logger.debug(8, f"Message10 complete. Size {len(msg)}, remaining in indata {len(self.indata)}")
-        return msg
+        #self.indata = b""
+        self.channel.close()
 
   def read_msg_11(self):
     chunk_size = 10000
@@ -286,8 +286,8 @@ class NETCONF_Server(YANG_Server):
       Logger.debug(10, f'Sending NC11 delimiter', payload=self.delimiter11)
       self.channel.send(self.delimiter11)
     if netconf_ver == 10:
-      Logger.debug(10, f'Sending NC10 delimiter', payload=self.delimiter10)
-      self.channel.send(self.delimiter10)
+      Logger.debug(10, f'Sending NC10 delimiter', payload=self.delimiter10b)
+      self.channel.send(self.delimiter10b)
     Logger.info(f"Sent {msg_len} bytes in NC{netconf_ver} message", payload=msg)
 
   # Callback

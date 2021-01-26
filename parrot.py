@@ -30,7 +30,7 @@ class Parrot:
         message_id = incoming_message.get_message_id(),
         session_id = "4711",#FIXME str(self.session_id),
       )
-      return response_msg
+      return response_msg.strip()
 
   def __init__(self):
     self.server = None
