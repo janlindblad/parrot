@@ -99,7 +99,6 @@ class NETCONF_Server(YANG_Server):
       Logger.info(f'Client {ip}:{port} disconnected')
 
   def handle_connection(self, host_key):
-    Logger.warning('NC0 handle connection')
     try:
       DoGSSAPIKeyExchange = False
       t = Transport(self.sock, gss_kex=DoGSSAPIKeyExchange)

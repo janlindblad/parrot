@@ -36,7 +36,7 @@ class NETCONFsubsys (SubsystemHandler):
         Logger.debug(9, f'NETCONFsubsys: init done')
 
     def start_subsystem(self, name, transport, channel):
-        Logger.debug(7, f'NETCONFsubsys: start_subsystem name={name} transport={transport} channel={channel}')
+        Logger.debug(8, f'NETCONFsubsys: start_subsystem name={name} transport={transport} channel={channel}')
         self.sock = channel
         Logger.debug(9, 'Started NETCONF server on channel {!r}'.format(channel))
         try:
@@ -44,7 +44,7 @@ class NETCONFsubsys (SubsystemHandler):
         except Exception as e:
             Logger.error(f'NETCONFsubsys: callback exception {e}')
             ##raise
-        Logger.debug(7,'Stopped NETCONF server on channel {!r}'.format(channel))
+        Logger.debug(8,'Stopped NETCONF server on channel {!r}'.format(channel))
 
     def finish_subsystem(self):
         Logger.debug(9, f'NETCONFsubsys: finish_subsystem')
