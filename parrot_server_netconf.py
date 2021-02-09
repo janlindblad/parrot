@@ -196,6 +196,7 @@ class NETCONF_Server(YANG_Server):
         msg = self.indata
         #self.indata = b""
         self.channel.close()
+        return msg
 
   def read_msg_11(self):
     chunk_size = 10000

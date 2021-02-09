@@ -1,0 +1,162 @@
+{# ######### ######### ######### ######### ######### ######### ######### ######### ######### ######### #}
+{% if request.match("<rpc><get-config/></rpc>") %}
+<rpc-reply message-id="{{ message_id }}"
+           xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <data>
+    <nacm xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-acm">
+      <enable-nacm>false</enable-nacm>
+      <read-default>deny</read-default>
+      <write-default>deny</write-default>
+      <exec-default>deny</exec-default>
+    </nacm>
+  </data>
+</rpc-reply>
+{# ######### ######### ######### ######### ######### ######### ######### ######### ######### ######### #}
+{% elif request.match("""<rpc xmlns='urn:ietf:params:xml:ns:netconf:base:1.0' message-id='1'>
+<get><filter><modules-state xmlns='urn:ietf:params:xml:ns:yang:ietf-yang-library'/></filter></get></rpc>""") %}
+<?xml version="1.0" encoding="UTF-8"?>
+<rpc-reply message-id="1" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <data>
+        <yang-library xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library" xmlns:yl="urn:ietf:params:xml:ns:yang:ietf-yang-library">
+            <content-id>20.10.R1</content-id>
+            <datastore>
+                <name>candidate</name>
+            </datastore>
+            <datastore>
+                <name>dynamic</name>
+            </datastore>
+            <!--datastore>
+                <name xmlns:nokia="http:/example.com/ns/1">nokia:configure-candidate</name>
+            </datastore-->
+            <!--datastore>
+                <name>configure-intended</name>
+            </datastore>
+            <datastore>
+                <name>configure-running</name>
+            </datastore>
+            <datastore>
+                <name>configure-startup</name>
+            </datastore>
+            <datastore>
+                <name>intended</name>
+            </datastore>
+            <datastore>
+                <name>li-candidate</name>
+            </datastore>
+            <datastore>
+                <name>li-intended</name>
+            </datastore>
+            <datastore>
+                <name>li-running</name>
+            </datastore>
+            <datastore>
+                <name>li-startup</name>
+            </datastore-->
+            <datastore>
+                <name>running</name>
+            </datastore>
+            <datastore>
+                <name>startup</name>
+            </datastore>
+        </yang-library>
+    </data>
+</rpc-reply>
+{# ######### ######### ######### ######### ######### ######### ######### ######### ######### ######### #}
+{% elif request.match("<hello xmlns='parrot'/>") %}
+<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <capabilities>
+    <capability>urn:ietf:params:netconf:base:1.0</capability>
+    <!--capability>urn:ietf:params:netconf:base:1.1</capability-->
+    <capability>urn:ietf:params:netconf:capability:candidate:1.0</capability>
+    <capability>urn:ietf:params:netconf:capability:confirmed-commit:1.1</capability>
+    <capability>urn:ietf:params:netconf:capability:rollback-on-error:1.0</capability>
+    <capability>urn:ietf:params:netconf:capability:notification:1.0</capability>
+    <capability>urn:ietf:params:netconf:capability:interleave:1.0</capability>
+    <capability>urn:ietf:params:netconf:capability:validate:1.0</capability>
+    <capability>urn:ietf:params:netconf:capability:validate:1.1</capability>
+    <capability>urn:ietf:params:netconf:capability:startup:1.0</capability>
+    <capability>urn:ietf:params:netconf:capability:url:1.0?scheme=ftp,tftp,file</capability>
+    <capability>urn:ietf:params:netconf:capability:with-defaults:1.0?basic-mode=explicit&amp;also-supported=report-all</capability>
+    <capability>urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring</capability>
+    <!--capability>urn:ietf:params:netconf:capability:yang-library:1.0?revision=2016-06-21&amp;module-set-id=20.2.R1</capability-->
+    <capability>urn:nokia.com:sros:ns:yang:sr:major-release-20</capability>
+    <capability>urn:ietf:params:xml:ns:yang:iana-if-type?module=iana-if-type&amp;revision=2014-05-08</capability>
+    <capability>urn:ietf:params:xml:ns:yang:ietf-inet-types?module=ietf-inet-types&amp;revision=2013-07-15</capability>
+    <capability>urn:ietf:params:xml:ns:yang:ietf-interfaces?module=ietf-interfaces&amp;revision=2018-02-20</capability>
+    <capability>urn:ietf:params:xml:ns:netconf:base:1.0?module=ietf-netconf&amp;revision=2011-06-01&amp;features=candidate,validate,startup,url&amp;deviations=nokia-ietf-netconf-deviations</capability>
+    <capability>urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring?module=ietf-netconf-monitoring&amp;revision=2010-10-04</capability>
+    <capability>urn:ietf:params:xml:ns:yang:ietf-netconf-notifications?module=ietf-netconf-notifications&amp;revision=2012-02-06</capability>
+    <capability>urn:ietf:params:xml:ns:yang:ietf-netconf-with-defaults?module=ietf-netconf-with-defaults&amp;revision=2011-06-01</capability>
+    <capability>urn:ietf:params:xml:ns:yang:ietf-yang-library?module=ietf-yang-library&amp;revision=2016-06-21</capability>
+    <capability>urn:ietf:params:xml:ns:yang:ietf-yang-metadata?module=ietf-yang-metadata&amp;revision=2016-08-05</capability>
+    <capability>urn:ietf:params:xml:ns:yang:ietf-yang-smiv2?module=ietf-yang-smiv2&amp;revision=2012-06-22</capability>
+    <capability>urn:ietf:params:xml:ns:yang:ietf-yang-types?module=ietf-yang-types&amp;revision=2013-07-15</capability>
+    <capability>urn:ietf:params:xml:ns:netmod:notification?module=nc-notifications&amp;revision=2008-07-14</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:conf?module=nokia-conf&amp;revision=2020-02-14</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:ietf-netconf-deviations?module=nokia-ietf-netconf-deviations&amp;revision=2019-01-01</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:li-conf?module=nokia-li-conf&amp;revision=2016-01-01</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:li-state?module=nokia-li-state&amp;revision=2016-01-01</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:notifications?module=nokia-notifications&amp;revision=2019-06-16</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:sros-yang-extensions?module=nokia-sros-yang-extensions&amp;revision=2016-01-01</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:state?module=nokia-state&amp;revision=2020-02-14</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-aa?module=nokia-types-application-assurance&amp;revision=2020-01-02</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-bfd?module=nokia-types-bfd&amp;revision=2019-12-11</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-bgp?module=nokia-types-bgp&amp;revision=2020-01-10</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-card?module=nokia-types-card&amp;revision=2020-01-23</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-cellular?module=nokia-types-cellular&amp;revision=2018-09-18</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-cflowd?module=nokia-types-cflowd&amp;revision=2018-09-05</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-chassis?module=nokia-types-chassis&amp;revision=2019-12-04</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-dhcp?module=nokia-types-dhcp&amp;revision=2019-03-27</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-diameter?module=nokia-types-diameter&amp;revision=2019-09-04</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-eth-cfm?module=nokia-types-eth-cfm&amp;revision=2019-10-04</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-filter?module=nokia-types-filter&amp;revision=2019-12-24</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-igmp?module=nokia-types-igmp&amp;revision=2018-11-07</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-igp?module=nokia-types-igp&amp;revision=2018-10-04</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-ipsec?module=nokia-types-ipsec&amp;revision=2019-05-10</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-isa?module=nokia-types-isa&amp;revision=2019-07-29</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-isis?module=nokia-types-isis&amp;revision=2019-03-01</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-l2tp?module=nokia-types-l2tp&amp;revision=2019-06-25</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-ldp?module=nokia-types-ldp&amp;revision=2018-10-19</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-lldp?module=nokia-types-lldp&amp;revision=2018-04-11</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-log?module=nokia-types-log&amp;revision=2020-01-14</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-mcast-cac?module=nokia-types-mcast-cac&amp;revision=2018-07-14</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-mcast-mgmt?module=nokia-types-mcast-mgmt&amp;revision=2018-06-19</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-mcr?module=nokia-types-mcr&amp;revision=2017-12-12</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-mpls?module=nokia-types-mpls&amp;revision=2020-01-27</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-nat?module=nokia-types-nat&amp;revision=2018-12-04</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-oam?module=nokia-types-oam&amp;revision=2019-03-04</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-ospf?module=nokia-types-ospf&amp;revision=2018-09-28</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-pcc-rule?module=nokia-types-pcc-rule&amp;revision=2018-06-28</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-pim?module=nokia-types-pim&amp;revision=2019-09-16</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-policy?module=nokia-types-policy&amp;revision=2020-01-20</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-port?module=nokia-types-port&amp;revision=2019-12-05</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-ppp?module=nokia-types-ppp&amp;revision=2018-07-14</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-ptp?module=nokia-types-ptp&amp;revision=2019-08-22</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-qos?module=nokia-types-qos&amp;revision=2019-12-12</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-radius?module=nokia-types-radius&amp;revision=2019-03-06</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-redundancy?module=nokia-types-redundancy&amp;revision=2020-01-08</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-rip?module=nokia-types-rip&amp;revision=2018-06-14</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-ripng?module=nokia-types-ripng&amp;revision=2018-06-27</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-router?module=nokia-types-router&amp;revision=2020-01-06</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-rsvp?module=nokia-types-rsvp&amp;revision=2018-02-08</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-security?module=nokia-types-security&amp;revision=2019-04-05</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-services?module=nokia-types-services&amp;revision=2020-01-10</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-sfm?module=nokia-types-sfm&amp;revision=2019-04-17</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-sros?module=nokia-types-sros&amp;revision=2019-12-04</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-subscriber-mgmt?module=nokia-types-subscriber-mgmt&amp;revision=2019-11-05</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-system?module=nokia-types-system&amp;revision=2019-11-22</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-vrrp?module=nokia-types-vrrp&amp;revision=2019-09-04</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-wlan?module=nokia-types-wlan&amp;revision=2018-09-18</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:types-wlangw?module=nokia-types-wlangw&amp;revision=2019-04-11</capability>
+    <capability>urn:ietf:params:xml:ns:netconf:notification:1.0?module=notifications&amp;revision=2008-07-14</capability>
+    <capability>urn:ietf:params:xml:ns:yang:1?module=yang&amp;revision=2017-02-20</capability>
+  </capabilities>
+  <session-id>71</session-id>
+</hello>
+{# ######### ######### ######### ######### ######### ######### ######### ######### ######### ######### #}
+{% elif request.match("<hello/>") %}
+<?parrot ignore netconf11?>
+{# ######### ######### ######### ######### ######### ######### ######### ######### ######### ######### #}
+{% elif request.match("<rpc><close-session/></rpc>") %}
+<?parrot end-session?>
+{% endif %}
