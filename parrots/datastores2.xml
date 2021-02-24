@@ -1,0 +1,124 @@
+{# ######### ######### ######### ######### ######### ######### ######### ######### ######### ######### #}
+{% if request.match("<rpc><get-config/></rpc>") %}
+<rpc-reply message-id="{{ message_id }}"
+           xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <data>
+    <nacm xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-acm">
+      <enable-nacm>false</enable-nacm>
+      <read-default>deny</read-default>
+      <write-default>deny</write-default>
+      <exec-default>deny</exec-default>
+    </nacm>
+  </data>
+</rpc-reply>
+{# ######### ######### ######### ######### ######### ######### ######### ######### ######### ######### #}
+{% elif request.match("""<rpc xmlns='urn:ietf:params:xml:ns:netconf:base:1.0' message-id='1'>
+<get><filter><yang-library xmlns='urn:ietf:params:xml:ns:yang:ietf-yang-library'/><modules-state xmlns='urn:ietf:params:xml:ns:yang:ietf-yang-library'/></filter></get></rpc>""") %}
+<rpc-reply message-id="1" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <data>
+    <yang-library xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library" xmlns:ds="urn:ietf:params:xml:ns:yang:ietf-datastores">
+      <content-id>0.0.B0-6522</content-id>
+      <module-set>
+        <name>20.2.R1</name>
+        <module>
+          <name>ietf-netconf-acm</name>
+          <revision>2018-02-14</revision>
+          <namespace>urn:ietf:params:xml:ns:yang:ietf-netconf-acm</namespace>
+          <conformance-type>implement</conformance-type>
+        </module>
+        <module>
+          <name>ietf-yang-library</name>
+          <revision>2019-01-04</revision>
+          <namespace>urn:ietf:params:xml:ns:yang:ietf-yang-library</namespace>
+          <conformance-type>implement</conformance-type>
+        </module>
+        <module>
+          <name>ietf-datastores</name>
+          <revision>2018-02-14</revision>
+          <namespace>urn:ietf:params:xml:ns:yang:ietf-datastores</namespace>
+          <conformance-type>implement</conformance-type>
+        </module>
+        <module>
+          <name>nokia-conf</name>
+          <revision>2020-02-14</revision>
+          <namespace>urn:nokia.com:sros:ns:yang:sr:conf</namespace>
+          <conformance-type>implement</conformance-type>
+        </module>
+      </module-set>
+      <schema>
+        <name>running</name>
+        <module-set>20.2.R1</module-set>
+      </schema>
+      <datastore>
+        <name>candidate</name>
+      </datastore>
+      <datastore> <!-- FIXME should be allowed according to RFC -->
+        <name xmlns:nokia="http:/example.com/ns/1">nokia:configure-candidate</name>
+      </datastore>
+      <datastore> <!-- FIXME malformed, but maybe we should ignore it -->
+        <name>configure-intended</name>
+      </datastore>
+      <datastore>
+        <name>ds:dynamic</name>
+      </datastore>
+      <datastore>
+        <name>ds:running</name>
+        <schema>running</schema>
+      </datastore>
+      <datastore>
+        <name>startup</name>
+      </datastore>
+    </yang-library>
+    <modules-state xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">
+      <module-set-id>20.2.R1</module-set-id>
+      <module>
+        <name>ietf-netconf-acm</name>
+        <revision>2018-02-14</revision>
+        <namespace>urn:ietf:params:xml:ns:yang:ietf-netconf-acm</namespace>
+        <conformance-type>implement</conformance-type>
+      </module>
+      <module>
+        <name>ietf-yang-library</name>
+        <revision>2019-01-04</revision>
+        <namespace>urn:ietf:params:xml:ns:yang:ietf-yang-library</namespace>
+        <conformance-type>implement</conformance-type>
+      </module>
+      <module>
+        <name>ietf-datastores</name>
+        <revision>2018-02-14</revision>
+        <namespace>urn:ietf:params:xml:ns:yang:ietf-datastores</namespace>
+        <conformance-type>implement</conformance-type>
+      </module>
+    </modules-state>
+  </data>
+</rpc-reply>
+{# ######### ######### ######### ######### ######### ######### ######### ######### ######### ######### #}
+{% elif request.match("<hello xmlns='parrot'/>") %}
+<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <capabilities>
+    <capability>urn:ietf:params:netconf:base:1.0</capability>
+    <capability>urn:ietf:params:netconf:base:1.1</capability>
+    <capability>urn:ietf:params:netconf:capability:candidate:1.0</capability>
+    <capability>urn:ietf:params:netconf:capability:confirmed-commit:1.1</capability>
+    <capability>urn:ietf:params:netconf:capability:rollback-on-error:1.0</capability>
+    <capability>urn:ietf:params:netconf:capability:notification:1.0</capability>
+    <capability>urn:ietf:params:netconf:capability:interleave:1.0</capability>
+    <capability>urn:ietf:params:netconf:capability:validate:1.0</capability>
+    <capability>urn:ietf:params:netconf:capability:validate:1.1</capability>
+    <capability>urn:ietf:params:netconf:capability:startup:1.0</capability>
+    <capability>urn:ietf:params:netconf:capability:url:1.0?scheme=ftp,tftp,file</capability>
+    <capability>urn:ietf:params:netconf:capability:with-defaults:1.0?basic-mode=explicit&amp;also-supported=report-all</capability>
+    <capability>urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring</capability>
+    <capability>urn:ietf:params:netconf:capability:yang-library:1.1?revision=2019-01-04&amp;module-set-id=20.2.R1</capability>
+    <capability>urn:nokia.com:sros:ns:yang:sr:major-release-20</capability>
+    <capability>urn:ietf:params:xml:ns:yang:ietf-netconf-acm?module=ietf-netconf-acm&amp;revision=2018-02-14</capability>
+  </capabilities>
+  <session-id>71</session-id>
+</hello>
+{# ######### ######### ######### ######### ######### ######### ######### ######### ######### ######### #}
+{% elif request.match("<hello/>") %}
+<?parrot netconf11?>
+{# ######### ######### ######### ######### ######### ######### ######### ######### ######### ######### #}
+{% elif request.match("<rpc><close-session/></rpc>") %}
+<?parrot end-session?>
+{% endif %}
